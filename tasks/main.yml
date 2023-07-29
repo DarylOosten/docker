@@ -39,3 +39,10 @@
     - name: Install docker python package
       pip:
         name: docker
+
+    - name: Setup cron job to stop Docker for backup
+      ansible.builtin.cron:
+        name: "Pause Docker for backup"
+        hour: "14"
+        minute: "37"
+        job: "sudo systemctl stop docker"
