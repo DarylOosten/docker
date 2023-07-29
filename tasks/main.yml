@@ -43,6 +43,13 @@
     - name: Setup cron job to stop Docker for backup
       ansible.builtin.cron:
         name: "Pause Docker for backup"
-        hour: "14"
-        minute: "52"
-        job: "env > /tmp/env.output"
+        hour: "15"
+        minute: "0"
+        job: "sudo systemctl stop docker"
+
+    - name: Setup cron job to stop Docker for backup
+      ansible.builtin.cron:
+        name: "Resume Docker after backup"
+        hour: "15"
+        minute: "15"
+        job: "sudo systemctl start docker"
