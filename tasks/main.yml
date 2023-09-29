@@ -11,7 +11,16 @@
           - curl
           - gnupg
 
-    - include_tasks: "add_{{ ansible_distribution }}_apt_repo.yml"
+    - name: Add APT key
+      ansible.builtin.apt_key:
+        url: 'https://download.docker.com/linux/{{ ansible_distribution|lower }}/gpg'
+        state: present
+
+    - name: Add APT repository
+      ansible.builtin.apt_repository:
+        repo: 'deb https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable'
+        state: present
+      notify: apt update
 
     - name: Install Docker
       package:
