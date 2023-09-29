@@ -11,16 +11,7 @@
           - curl
           - gnupg
 
-    - name: Add APT key
-      ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add APT repository
-      ansible.builtin.apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
-        state: present
-      notify: apt update
+    - include_tasks: "add_{{ packages[ansible_distribution] }}_apt_repo.yml"
 
     - name: Install Docker
       package:
@@ -28,6 +19,7 @@
           - docker-ce
           - docker-ce-cli
           - containerd.io
+          - docker-buildx-plugin
           - docker-compose-plugin
 
     - name: Ensure Docker is enabled and started
@@ -35,7 +27,3 @@
         name: docker
         enabled: true
         state: started
-
-    - name: Install docker python package
-      pip:
-        name: docker
