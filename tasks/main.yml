@@ -23,6 +23,13 @@
           {{
             (_os_release_raw.content | b64decode)
             | regex_search('(?m)^VERSION_CODENAME=(.+)$', '\\1')
+            | default(
+                # Some Ubuntu derivatives (e.g. Linux Mint) use UBUNTU_CODENAME instead
+                (_os_release_raw.content | b64decode)
+                | regex_search('(?m)^UBUNTU_CODENAME=(.+)$', '\\1'),
+                true  # true = also fall back when the value is None/falsy, not just undefined
+              )
+            | default([ansible_distribution_release | lower], true)  # last resort: Ansible's built-in fact
             | first
             | lower
           }}
