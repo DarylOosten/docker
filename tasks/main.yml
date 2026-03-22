@@ -4,6 +4,16 @@
   tags: install
   block:
 
+    - name: Set Debian codename for LMDE
+      set_fact:
+        docker_repo_codename: "{{ ansible_facts['lsb']['upstream_codename'] }}"
+      when: ansible_distribution == 'Linux Mint Debian Edition'
+
+    - name: Set Debian codename for plain Debian
+      set_fact:
+        docker_repo_codename: "{{ ansible_distribution_release }}"
+      when: ansible_distribution == 'Debian'
+
     - name: Install dependencies
       package:
         name:
@@ -13,12 +23,12 @@
 
     - name: Add APT key
       ansible.builtin.apt_key:
-        url: 'https://download.docker.com/linux/{{ ansible_distribution|lower }}/gpg'
+        url: 'https://download.docker.com/linux/debian/gpg'
         state: present
 
     - name: Add APT repository
       ansible.builtin.apt_repository:
-        repo: 'deb https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable'
+        repo: 'deb https://download.docker.com/linux/debian {{ docker_repo_codename }} stable'
         state: present
       notify: apt update
 
