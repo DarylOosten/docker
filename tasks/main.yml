@@ -4,9 +4,15 @@
   tags: install
   block:
 
+    - name: Read DEBIAN_CODENAME from /etc/os-release for LMDE
+      shell: |
+        . /etc/os-release && echo $DEBIAN_CODENAME
+      register: lmde_codename
+      when: ansible_distribution == 'Linux Mint Debian Edition'
+
     - name: Set Debian codename for LMDE
       set_fact:
-        docker_repo_codename: "{{ ansible_facts['lsb']['upstream_codename'] }}"
+        docker_repo_codename: "{{ lmde_codename.stdout }}"
       when: ansible_distribution == 'Linux Mint Debian Edition'
 
     - name: Set Debian codename for plain Debian
