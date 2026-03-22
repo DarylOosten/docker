@@ -21,11 +21,16 @@
         _docker_distro: "{{ 'ubuntu' if ansible_distribution == 'Ubuntu' else 'debian' }}"
         _docker_codename: >-
           {{
-            (
-              ((_os_release_raw.content | b64decode) | regex_findall('(?m)^VERSION_CODENAME=(.+)$'))
-              or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=(.+)$'))
-              or [ansible_distribution_release | lower]
-            ) | first | lower
+            (_os_release_raw.content | b64decode)
+            | regex_search('(?m)^VERSION_CODENAME=(.+)$', '\\1')
+            | default(
+                (_os_release_raw.content | b64decode)
+                | regex_search('(?m)^UBUNTU_CODENAME=(.+)$', '\\1'),
+                true
+              )
+            | default([ansible_distribution_release | lower], true)
+            | first
+            | lower
           }}
 
     - name: Add APT key
