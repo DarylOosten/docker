@@ -9,6 +9,13 @@ galaxy_info:
   platforms:
     - name: Ubuntu
       versions:
-        - jammy
+        - all
+    - name: Debian
+      versions:
+        - bookworm
+        - bullseye
+    - name: Linux Mint
+      versions:
+        - all
   galaxy_tags: []
 dependencies: []
