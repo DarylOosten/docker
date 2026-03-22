@@ -11,44 +11,14 @@
           - curl
           - gnupg
 
-    - name: Read /etc/os-release
-      ansible.builtin.slurp:
-        src: /etc/os-release
-      register: _os_release_raw
-
-    - name: Read /etc/upstream-release/lsb-release (Linux Mint — contains upstream Ubuntu codename)
-      ansible.builtin.slurp:
-        src: /etc/upstream-release/lsb-release
-      register: _upstream_release_raw
-      ignore_errors: true
-
-    - name: Resolve Docker repository distro and codename
-      ansible.builtin.set_fact:
-        _docker_distro: >-
-          {{
-            'ubuntu' if (
-              ansible_distribution == 'Ubuntu'
-              or 'ubuntu' in ((_os_release_raw.content | b64decode) | regex_findall('(?m)^ID_LIKE=(.+)$') | join)
-            ) else 'debian'
-          }}
-        _docker_codename: >-
-          {{
-            (
-              ((_upstream_release_raw.content | default('') | b64decode) | regex_findall('(?m)^DISTRIB_CODENAME=(.+)$'))
-              or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=(.+)$'))
-              or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^VERSION_CODENAME=(.+)$'))
-              or [ansible_distribution_release | lower]
-            ) | first | lower
-          }}
-
     - name: Add APT key
       ansible.builtin.apt_key:
-        url: 'https://download.docker.com/linux/{{ _docker_distro }}/gpg'
+        url: 'https://download.docker.com/linux/{{ ansible_distribution|lower }}/gpg'
         state: present
 
     - name: Add APT repository
       ansible.builtin.apt_repository:
-        repo: 'deb https://download.docker.com/linux/{{ _docker_distro }} {{ _docker_codename }} stable'
+        repo: 'deb https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable'
         state: present
       notify: apt update
 
