@@ -11,10 +11,21 @@
           - curl
           - gnupg
 
+    - name: Read /etc/os-release
+      ansible.builtin.slurp:
+        src: /etc/os-release
+      register: _os_release_raw
+
     - name: Resolve Docker repository distro and codename
       set_fact:
         _docker_distro: "{{ 'ubuntu' if ansible_distribution == 'Ubuntu' else 'debian' }}"
-        _docker_codename: "{{ ansible_lsb.codename | lower }}"
+        _docker_codename: >-
+          {{
+            (_os_release_raw.content | b64decode)
+            | regex_search('(?m)^VERSION_CODENAME=(.+)$', '\\1')
+            | first
+            | lower
+          }}
 
     - name: Add APT key
       ansible.builtin.apt_key:
