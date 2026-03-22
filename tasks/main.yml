@@ -16,10 +16,10 @@
         src: /etc/os-release
       register: _os_release_raw
 
-    - name: Read /etc/upstream-release/lsb-release (Linux Mint — contains upstream Ubuntu codename)
+    - name: Read /etc/linuxmint/info (present on Linux Mint and LMDE — contains upstream distro codename)
       ansible.builtin.slurp:
-        src: /etc/upstream-release/lsb-release
-      register: _upstream_release_raw
+        src: /etc/linuxmint/info
+      register: _mint_info_raw
       ignore_errors: true
 
     - name: Resolve Docker repository distro and codename
@@ -28,13 +28,14 @@
           {{
             'ubuntu' if (
               ansible_distribution == 'Ubuntu'
-              or 'ubuntu' in ((_os_release_raw.content | b64decode) | regex_findall('(?m)^ID_LIKE=(.+)$') | join)
+              or (_mint_info_raw.content | default('') | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=.+$')
             ) else 'debian'
           }}
         _docker_codename: >-
           {{
             (
-              ((_upstream_release_raw.content | default('') | b64decode) | regex_findall('(?m)^DISTRIB_CODENAME=(.+)$'))
+              ((_mint_info_raw.content | default('') | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=(.+)$'))
+              or ((_mint_info_raw.content | default('') | b64decode) | regex_findall('(?m)^DEBIAN_CODENAME=(.+)$'))
               or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=(.+)$'))
               or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^VERSION_CODENAME=(.+)$'))
               or [ansible_distribution_release | lower]
