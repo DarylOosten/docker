@@ -22,8 +22,8 @@
         _docker_codename: >-
           {{
             (
-              ((_os_release_raw.content | b64decode) | regex_findall('(?m)^VERSION_CODENAME=(.+)$'))
-              or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=(.+)$'))
+              ((_os_release_raw.content | b64decode) | regex_findall('(?m)^UBUNTU_CODENAME=(.+)$'))
+              or ((_os_release_raw.content | b64decode) | regex_findall('(?m)^VERSION_CODENAME=(.+)$'))
               or [ansible_distribution_release | lower]
             ) | first | lower
           }}
